@@ -1,4 +1,4 @@
-import { GitMergeRequest } from './git.types';
+import { GitMergeRequest } from './git.type';
 
 export interface IGitClient {
   getMergeRequest(

@@ -1,14 +1,16 @@
-import { ReviewMergeRequest } from '@/app/usecases/review-merge-request';
+import { SimpleReview } from '@/app/usecases/simple-review';
 import { NestFactory } from '@nestjs/core';
 import { Command } from 'commander';
 import { CliModule } from './cli.module';
-import { GitlabClient } from '@/core/git/gitlab.client';
+import { GitService } from '@/core/git/git.service';
+import { TicketService } from '@/core/ticket/ticket.service';
+import { TicketAnalyzerAgent } from '@/core/ai/agents/ticket-analyzer/ticket-analyzer.agent';
+import { GitReviewAgent } from '@/core/ai/agents/git-review/git-review.agent';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(CliModule, {
-    logger: false,
+    // logger: false,
   });
-  const gitlabClient = app.get(GitlabClient);
 
   const program = new Command();
   program
@@ -17,8 +19,13 @@ async function bootstrap() {
     .option('-m, --merge-request <id>', 'Specify a merge request id')
     .option('-p, --project <id>', 'Specify a project id')
     .action(async (options: { mergeRequest: string; project: string }) => {
-      const reviewMergeRequest = new ReviewMergeRequest(gitlabClient);
-      await reviewMergeRequest.exec(options.project, options.mergeRequest);
+      const simpleReview = new SimpleReview(
+        app.get(GitService),
+        app.get(TicketService),
+        app.get(TicketAnalyzerAgent),
+        app.get(GitReviewAgent),
+      );
+      await simpleReview.exec(options.project, options.mergeRequest);
     });
 
   program.parse(process.argv);

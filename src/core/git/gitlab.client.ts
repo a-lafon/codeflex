@@ -2,9 +2,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { DiscussionSchema, Gitlab } from '@gitbeaker/rest';
+import {
+  DiscussionSchema,
+  ExpandedMergeRequestSchema,
+  Gitlab,
+} from '@gitbeaker/rest';
 import { IGitClient } from './git.interface';
-import { GitMergeRequest } from './git.types';
+import { GitMergeRequest } from './git.type';
 import { Injectable } from '@nestjs/common';
 
 const client = new Gitlab({
@@ -26,14 +30,18 @@ export class GitlabClient implements IGitClient {
     mergeRequestId: string,
   ): Promise<GitMergeRequest> {
     const mergeRequestIdNumber = parseInt(mergeRequestId, 10);
-    const [diffs, discussions] = await Promise.all([
+    const [mergeRequest, diffs, discussions] = await Promise.all([
+      client.MergeRequests.show(projectId, mergeRequestIdNumber),
       client.MergeRequests.allDiffs(projectId, mergeRequestIdNumber),
       client.MergeRequestDiscussions.all(projectId, mergeRequestIdNumber),
     ]);
 
     const userDiscussions = this.filterUserDiscussions(discussions);
+    const jiraId = this.getJiraId(mergeRequest);
+
     return {
       id: mergeRequestId,
+      title: mergeRequest.title,
       discussions: userDiscussions.map((discussion) => ({
         id: discussion.id,
         notes:
@@ -56,7 +64,24 @@ export class GitlabClient implements IGitClient {
         newPath: d.new_path,
         oldPath: d.old_path,
       })),
+      jiraId,
+      languageCode: 'ts',
     };
+  }
+
+  private getJiraId(
+    mergeRequest: ExpandedMergeRequestSchema,
+  ): string | undefined {
+    try {
+      const match = mergeRequest.title.match(/\b[A-Z]+-\d+\b/);
+      if (match) {
+        return match[0];
+      }
+      return;
+    } catch (error) {
+      console.error(error);
+      return;
+    }
   }
 
   private filterUserDiscussions(

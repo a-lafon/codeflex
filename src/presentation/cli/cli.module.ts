@@ -1,8 +1,9 @@
-import { GitlabClient } from '@/core/git/gitlab.client';
+import { AiModule } from '@/core/ai/ai.module';
+import { GitModule } from '@/core/git/git.module';
+import { TicketModule } from '@/core/ticket/ticket.module';
 import { Module } from '@nestjs/common';
 
 @Module({
-  providers: [GitlabClient],
-  exports: [GitlabClient],
+  imports: [GitModule, AiModule, TicketModule],
 })
 export class CliModule {}

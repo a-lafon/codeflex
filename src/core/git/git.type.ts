@@ -1,3 +1,5 @@
+export type LanguageCode = 'ts' | 'go' | 'python';
+
 export type GitDiff = {
   diff: string;
   newPath: string;
@@ -25,6 +27,9 @@ export type GitNote = {
 
 export type GitMergeRequest = {
   id: string;
+  title: string;
   diffs: GitDiff[];
   discussions: GitDiscussions[];
+  jiraId?: string;
+  languageCode: LanguageCode;
 };
