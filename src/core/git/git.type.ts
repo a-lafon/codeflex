@@ -1,4 +1,4 @@
-export type LanguageCode = 'ts' | 'go' | 'python';
+export type LanguageCode = 'ts' | 'js' | 'go' | 'py';
 
 export type GitDiff = {
   diff: string;

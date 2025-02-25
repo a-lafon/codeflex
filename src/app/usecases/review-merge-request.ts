@@ -1,33 +1,45 @@
 import { GitReviewAgent } from '@/core/ai/agents/git-review/git-review.agent';
-import { TicketAnalyzerAgent } from '@/core/ai/agents/ticket-analyzer/ticket-analyzer.agent';
 import { GitService } from '@/core/git/git.service';
-import { TicketService } from '@/core/ticket/ticket.service';
-import { Ticket } from '@/core/ticket/ticket.type';
+
+export type ReviewOptions = {
+  detailLevel?: 'basic' | 'standard' | 'thorough';
+  focusAreas?: string[];
+  ignorePatterns?: string[];
+  verbose?: boolean;
+};
 
 export class ReviewMergeRequest {
   constructor(
     private readonly gitService: GitService,
-    private readonly ticketService: TicketService,
-    private readonly ticketAnalyzer: TicketAnalyzerAgent,
     private readonly gitReviewAgent: GitReviewAgent,
   ) {}
 
-  async exec(projectId: string, mergeRequestId: string) {
-    let ticket: Ticket | undefined = undefined;
+  async exec(
+    projectId: string,
+    mergeRequestId: string,
+    options?: ReviewOptions,
+  ) {
+    if (options?.verbose) {
+      console.log(
+        `Fetching merge request ${mergeRequestId} from project ${projectId}`,
+      );
+    }
 
     const mergeRequest = await this.gitService.getMergeRequest(
       projectId,
       mergeRequestId,
     );
 
-    const review = await this.gitReviewAgent.review(mergeRequest);
-
-    console.log(review);
-
-    if (mergeRequest.jiraId) {
-      ticket = await this.ticketService.getTicket(mergeRequest.jiraId);
-      const ticketWithReview = await this.ticketAnalyzer.extract(ticket);
-      console.log(ticketWithReview);
+    if (options?.verbose) {
+      console.log(`Retrieved merge request: "${mergeRequest.title}"`);
+      console.log(
+        `Starting code review with options:`,
+        JSON.stringify(options, null, 2),
+      );
     }
+
+    const review = await this.gitReviewAgent.review(mergeRequest, options);
+
+    return review;
   }
 }

@@ -3,7 +3,11 @@ import { ILlmProvider, ModelEnum } from '../../core/ai/ai.interface';
 // import { encodingForModel, TiktokenModel } from 'js-tiktoken';
 import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
-import { targetConstructorToSchema } from 'class-validator-jsonschema';
+import {
+  targetConstructorToSchema,
+  validationMetadatasToSchemas,
+} from 'class-validator-jsonschema';
+import { defaultMetadataStorage } from 'class-transformer/cjs/storage'; // See https://github.com/typestack/class-transformer/issues/563 for alternatives
 
 const models = new Map<ModelEnum, string>([
   [ModelEnum.SMALL, 'gpt-4o-mini'],
@@ -26,11 +30,18 @@ export class OpenAiService implements ILlmProvider {
     dto: new () => T;
     model: ModelEnum;
   }): Promise<T> {
+    const schemas = validationMetadatasToSchemas({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      classTransformerMetadataStorage: defaultMetadataStorage,
+    });
     const schemaName = this.camelToSnake(opts.dto.name);
     const schema = targetConstructorToSchema(opts.dto) as Record<
       string,
       unknown
     >;
+    const model = models.get(opts.model) ?? 'gpt-4o-mini';
+
+    console.log('start completion with model', model);
 
     const completion = await this.openaiClient.chat.completions.create({
       messages: [
@@ -40,7 +51,7 @@ export class OpenAiService implements ILlmProvider {
         },
         { role: 'user', content: opts.prompt },
       ],
-      model: models.get(opts.model) ?? 'gpt-4o-mini',
+      model,
       response_format: {
         type: 'json_schema',
         json_schema: { schema, name: schemaName },
@@ -60,10 +71,7 @@ export class OpenAiService implements ILlmProvider {
   }
 
   private camelToSnake(str: string) {
-    return str
-      .replace(/([a-z])([A-Z])/g, '$1_$2')
-      .toLowerCase()
-      .replace('_dto', '');
+    return str.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
   }
 
   private async validateOutput<T extends object>(

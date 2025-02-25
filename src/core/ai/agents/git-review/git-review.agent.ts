@@ -1,13 +1,15 @@
 import { ILlmProvider, ModelEnum } from '../../ai.interface';
 import { Agent } from '../agent-base';
 import { Inject, Injectable } from '@nestjs/common';
-import { GitReviewDto } from './git-review.dto';
+import { GitReview } from './git-review.dto';
 import { GitDiff, GitMergeRequest, LanguageCode } from '@/core/git/git.type';
+import { ReviewOptions } from '@/app/usecases/review-merge-request';
 
 @Injectable()
-export class GitReviewAgent extends Agent<GitReviewDto> {
+export class GitReviewAgent extends Agent<GitReview> {
+  protected systemPrompt: string;
   protected model = ModelEnum.SMALL;
-  protected systemPrompt = `You are a highly capable Code Reviewer. 
+  protected baseSystemPrompt = `You are a highly capable Code Reviewer. 
   Your task is to analyze the given Git merge request and provide a detailed review of the code changes.
   Focus on the following aspects:
   1. Code quality (readability, maintainability, and adherence to best practices).
@@ -22,7 +24,7 @@ export class GitReviewAgent extends Agent<GitReviewDto> {
   - A detailed analysis of the changes, highlighting key modifications and their impact.
   - An optional rating of the code quality (out of 10).
   `;
-  protected dto = GitReviewDto;
+  protected dto = GitReview;
 
   constructor(
     @Inject(ILlmProvider) protected readonly llmProvider: ILlmProvider,
@@ -30,37 +32,76 @@ export class GitReviewAgent extends Agent<GitReviewDto> {
     super(llmProvider);
   }
 
-  async review(mergeRequest: GitMergeRequest) {
-    const prompt = this.buildPrompt(mergeRequest);
+  async review(mergeRequest: GitMergeRequest, options?: ReviewOptions) {
+    if (options?.detailLevel === 'thorough') {
+      this.model = ModelEnum.LARGE;
+    } else if (options?.detailLevel === 'standard') {
+      this.model = ModelEnum.MEDIUM;
+    } else {
+      this.model = ModelEnum.SMALL;
+    }
+
+    this.systemPrompt = this.getSystemPrompt();
+
+    const prompt = this.buildPrompt(mergeRequest, options);
     return this.execute(prompt);
   }
 
-  private buildPrompt(mergeRequest: GitMergeRequest): string {
+  private getSystemPrompt(options?: ReviewOptions): string {
+    let systemPrompt = this.baseSystemPrompt;
+    if (options?.detailLevel) {
+      systemPrompt += `\n\nProvide a ${options.detailLevel} level of detail in your review.`;
+    }
+    if (options?.focusAreas && options.focusAreas.length > 0) {
+      systemPrompt += `\n\nPay special attention to the following areas: ${options.focusAreas.join(', ')}.`;
+    }
+    return systemPrompt;
+  }
+
+  private buildPrompt(
+    mergeRequest: GitMergeRequest,
+    options?: ReviewOptions,
+  ): string {
     return `
-      Analyze the following Git merge request and provide a detailed code review.
+      Analyze the following Git merge request and provide a ${options?.detailLevel || 'standard'} code review.
 
       # Title:
       ${mergeRequest.title}
 
       # Changes:
-      ${this.formatDiff(mergeRequest)}
+      ${this.formatDiff(mergeRequest, {
+        removeTests: false,
+        ignorePatterns: options?.ignorePatterns,
+      })}
 
-      Focus on:
+      ${this.getFocusInstructions(options)}
+    `;
+  }
+
+  private getFocusInstructions(options?: ReviewOptions): string {
+    if (options?.focusAreas && options.focusAreas.length > 0) {
+      return `Focus especially on: ${options.focusAreas.join(', ')}.`;
+    }
+    return `Focus on:
       1. Code quality (readability, maintainability, and best practices).
       2. Potential bugs or security issues.
       3. Consistency with the project's coding standards.
-      4. Suggestions for improvement, if applicable.
-    `;
+      4. Suggestions for improvement, if applicable.`;
   }
 
   private formatDiff(
     mergeRequest: GitMergeRequest,
-    options?: { removeTests?: boolean },
+    options?: { removeTests?: boolean; ignorePatterns?: string[] },
   ): string {
     const filesToExclude = this.getFilesToExclude(
       mergeRequest.languageCode,
       options,
     );
+
+    if (options?.ignorePatterns) {
+      filesToExclude.push(...options.ignorePatterns);
+    }
+
     const filteredDiffs = this.filterUnexpectedFiles(
       mergeRequest.diffs,
       filesToExclude,
@@ -77,18 +118,35 @@ export class GitReviewAgent extends Agent<GitReviewDto> {
     languageCode: LanguageCode,
     options?: { removeTests?: boolean },
   ): string[] {
+    const files: string[] = [];
+
     switch (languageCode) {
-      case 'ts': {
-        const files = ['pnpm-lock', 'yarn.lock'];
-        if (options?.removeTests) {
-          files.push('.spec.ts');
-        }
-        return files;
-      }
-      default: {
-        return [];
+      case 'ts':
+        files.push('pnpm-lock', 'yarn.lock', 'package-lock.json');
+        break;
+      case 'js':
+        files.push('package-lock.json', 'yarn.lock');
+        break;
+      case 'py':
+        files.push('poetry.lock', 'Pipfile.lock');
+        break;
+    }
+
+    if (options?.removeTests) {
+      switch (languageCode) {
+        case 'ts':
+          files.push('.spec.ts', '.test.ts');
+          break;
+        case 'js':
+          files.push('.spec.js', '.test.js');
+          break;
+        case 'py':
+          files.push('test_', '_test.py');
+          break;
       }
     }
+
+    return files;
   }
 
   private filterUnexpectedFiles(diffs: GitDiff[], filesToExclude: string[]) {
