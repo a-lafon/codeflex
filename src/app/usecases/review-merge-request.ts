@@ -4,7 +4,7 @@ import { GitService } from '@/core/git/git.service';
 import { TicketService } from '@/core/ticket/ticket.service';
 import { Ticket } from '@/core/ticket/ticket.type';
 
-export class SimpleReview {
+export class ReviewMergeRequest {
   constructor(
     private readonly gitService: GitService,
     private readonly ticketService: TicketService,

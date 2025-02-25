@@ -1,4 +1,4 @@
-import { SimpleReview } from '@/app/usecases/simple-review';
+import { ReviewMergeRequest } from '@/app/usecases/review-merge-request';
 import { NestFactory } from '@nestjs/core';
 import { Command } from 'commander';
 import { CliModule } from './cli.module';
@@ -19,13 +19,13 @@ async function bootstrap() {
     .option('-m, --merge-request <id>', 'Specify a merge request id')
     .option('-p, --project <id>', 'Specify a project id')
     .action(async (options: { mergeRequest: string; project: string }) => {
-      const simpleReview = new SimpleReview(
+      const reviewMergeRequest = new ReviewMergeRequest(
         app.get(GitService),
         app.get(TicketService),
         app.get(TicketAnalyzerAgent),
         app.get(GitReviewAgent),
       );
-      await simpleReview.exec(options.project, options.mergeRequest);
+      await reviewMergeRequest.exec(options.project, options.mergeRequest);
     });
 
   program.parse(process.argv);

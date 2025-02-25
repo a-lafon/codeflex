@@ -1,13 +1,10 @@
 import { GitMergeRequest } from './git.type';
 
-export interface IGitClient {
+export interface IGitProvider {
   getMergeRequest(
     projectId: string,
     mergeRequestId: string,
   ): Promise<GitMergeRequest>;
-
-  getMergeRequests(
-    projectId: string,
-    options?: { lastDate?: Date },
-  ): Promise<GitMergeRequest[]>;
 }
+
+export const IGitProvider = Symbol('IGitProvider');

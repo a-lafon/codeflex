@@ -7,24 +7,15 @@ import {
   ExpandedMergeRequestSchema,
   Gitlab,
 } from '@gitbeaker/rest';
-import { IGitClient } from './git.interface';
-import { GitMergeRequest } from './git.type';
-import { Injectable } from '@nestjs/common';
+import { IGitProvider } from '../../core/git/git.interface';
+import { GitMergeRequest } from '../../core/git/git.type';
 
 const client = new Gitlab({
   host: process.env.GITLAB_HOST,
   token: process.env.GITLAB_TOKEN,
 });
 
-@Injectable()
-export class GitlabClient implements IGitClient {
-  getMergeRequests(
-    projectId: string,
-    options?: { lastDate?: Date },
-  ): Promise<GitMergeRequest[]> {
-    throw new Error('Method not implemented.');
-  }
-
+export class GitlabService implements IGitProvider {
   async getMergeRequest(
     projectId: string,
     mergeRequestId: string,

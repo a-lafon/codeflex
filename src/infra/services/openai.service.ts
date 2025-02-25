@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { ILlmProvider, ModelEnum } from './ai.interface';
+import { ILlmProvider, ModelEnum } from '../../core/ai/ai.interface';
 // import { encodingForModel, TiktokenModel } from 'js-tiktoken';
 import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
@@ -11,7 +11,7 @@ const models = new Map<ModelEnum, string>([
   [ModelEnum.LARGE, 'gpt-4o'],
 ]);
 
-export class OpenAiProvider implements ILlmProvider {
+export class OpenAiService implements ILlmProvider {
   private readonly openaiClient: OpenAI;
 
   constructor() {

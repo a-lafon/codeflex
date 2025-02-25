@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { GitlabClient } from './gitlab.client';
+import { Inject, Injectable } from '@nestjs/common';
 import { GitMergeRequest } from './git.type';
+import { IGitProvider } from './git.interface';
 
 @Injectable()
 export class GitService {
-  constructor(private readonly gitlabClient: GitlabClient) {}
+  constructor(
+    @Inject(IGitProvider) private readonly gitProvider: IGitProvider,
+  ) {}
 
   async getMergeRequest(
     projectId: string,
     mergeRequestId: string,
   ): Promise<GitMergeRequest> {
-    return this.gitlabClient.getMergeRequest(projectId, mergeRequestId);
+    return this.gitProvider.getMergeRequest(projectId, mergeRequestId);
   }
 }
