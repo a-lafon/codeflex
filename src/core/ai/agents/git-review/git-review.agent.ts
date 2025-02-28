@@ -1,14 +1,20 @@
 import { ILlmProvider, ModelEnum } from '../../ai.interface';
 import { Agent } from '../agent-base';
 import { Inject, Injectable } from '@nestjs/common';
-import { GitReview } from './git-review.dto';
 import { GitDiff, GitMergeRequest, LanguageCode } from '@/core/git/git.type';
 import { ReviewOptions } from '@/app/usecases/review-merge-request';
+import {
+  GitReviewSchema,
+  GitReviewJsonSchema,
+  GitReview,
+} from './git-review.schema';
 
 @Injectable()
-export class GitReviewAgent extends Agent<GitReview> {
+export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
+  protected schemaName = 'git_review';
+  protected schemaObject = GitReviewJsonSchema;
   protected systemPrompt: string;
-  protected model = ModelEnum.SMALL;
+  protected model: ModelEnum;
   protected baseSystemPrompt = `You are a highly capable Code Reviewer. 
   Your task is to analyze the given Git merge request and provide a detailed review of the code changes.
   Focus on the following aspects:
@@ -24,7 +30,6 @@ export class GitReviewAgent extends Agent<GitReview> {
   - A detailed analysis of the changes, highlighting key modifications and their impact.
   - An optional rating of the code quality (out of 10).
   `;
-  protected dto = GitReview;
 
   constructor(
     @Inject(ILlmProvider) protected readonly llmProvider: ILlmProvider,
@@ -32,7 +37,10 @@ export class GitReviewAgent extends Agent<GitReview> {
     super(llmProvider);
   }
 
-  async review(mergeRequest: GitMergeRequest, options?: ReviewOptions) {
+  async review(
+    mergeRequest: GitMergeRequest,
+    options?: ReviewOptions,
+  ): Promise<GitReview> {
     if (options?.detailLevel === 'thorough') {
       this.model = ModelEnum.LARGE;
     } else if (options?.detailLevel === 'standard') {
@@ -41,10 +49,10 @@ export class GitReviewAgent extends Agent<GitReview> {
       this.model = ModelEnum.SMALL;
     }
 
-    this.systemPrompt = this.getSystemPrompt();
+    this.systemPrompt = this.getSystemPrompt(options);
 
     const prompt = this.buildPrompt(mergeRequest, options);
-    return this.execute(prompt);
+    return this.execute(prompt, GitReviewSchema);
   }
 
   private getSystemPrompt(options?: ReviewOptions): string {

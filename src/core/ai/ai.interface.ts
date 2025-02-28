@@ -5,12 +5,13 @@ export enum ModelEnum {
 }
 
 export interface ILlmProvider {
-  getCompletion<T extends object>(opts: {
+  getCompletion(opts: {
     systemPrompt: string;
     prompt: string;
-    dto: new () => T;
     model: ModelEnum;
-  }): Promise<T>;
+    schemaName: string;
+    schema: Record<string, unknown>;
+  }): Promise<string>;
 }
 
 export const ILlmProvider = Symbol('ILlmProvider');

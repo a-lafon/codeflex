@@ -1,14 +1,6 @@
 import OpenAI from 'openai';
 import { ILlmProvider, ModelEnum } from '../../core/ai/ai.interface';
 // import { encodingForModel, TiktokenModel } from 'js-tiktoken';
-import { plainToInstance } from 'class-transformer';
-import { validateOrReject } from 'class-validator';
-import {
-  targetConstructorToSchema,
-  validationMetadatasToSchemas,
-} from 'class-validator-jsonschema';
-import { defaultMetadataStorage } from 'class-transformer/cjs/storage'; // See https://github.com/typestack/class-transformer/issues/563 for alternatives
-
 const models = new Map<ModelEnum, string>([
   [ModelEnum.SMALL, 'gpt-4o-mini'],
   [ModelEnum.MEDIUM, 'gpt-4o'],
@@ -24,25 +16,14 @@ export class OpenAiService implements ILlmProvider {
     });
   }
 
-  async getCompletion<T extends object>(opts: {
+  async getCompletion(opts: {
     systemPrompt: string;
     prompt: string;
-    dto: new () => T;
     model: ModelEnum;
-  }): Promise<T> {
-    const schemas = validationMetadatasToSchemas({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      classTransformerMetadataStorage: defaultMetadataStorage,
-    });
-    const schemaName = this.camelToSnake(opts.dto.name);
-    const schema = targetConstructorToSchema(opts.dto) as Record<
-      string,
-      unknown
-    >;
+    schemaName: string;
+    schema: Record<string, unknown>;
+  }): Promise<string> {
     const model = models.get(opts.model) ?? 'gpt-4o-mini';
-
-    console.log('start completion with model', model);
-
     const completion = await this.openaiClient.chat.completions.create({
       messages: [
         {
@@ -54,7 +35,10 @@ export class OpenAiService implements ILlmProvider {
       model,
       response_format: {
         type: 'json_schema',
-        json_schema: { schema, name: schemaName },
+        json_schema: {
+          name: opts.schemaName,
+          schema: opts.schema,
+        },
       },
     });
     const content = completion.choices[0].message.content;
@@ -67,26 +51,7 @@ export class OpenAiService implements ILlmProvider {
       throw Error('No content');
     }
 
-    return this.validateOutput(opts.dto, content);
-  }
-
-  private camelToSnake(str: string) {
-    return str.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
-  }
-
-  private async validateOutput<T extends object>(
-    dto: new () => T,
-    content: string,
-  ): Promise<T> {
-    try {
-      const rawResponse = JSON.parse(content) as Record<string, unknown>;
-      const instance = plainToInstance(dto, rawResponse);
-      await validateOrReject(instance);
-      return instance;
-    } catch (error) {
-      console.error('Invalid output format', error);
-      throw error;
-    }
+    return content;
   }
 
   // private countTokens(text: string, model: TiktokenModel): number {
