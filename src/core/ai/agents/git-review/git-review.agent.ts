@@ -39,7 +39,13 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
 
   async review(
     mergeRequest: GitMergeRequest,
-    options?: ReviewOptions,
+    {
+      options,
+      similarMergeRequests,
+    }: {
+      similarMergeRequests?: GitMergeRequest[];
+      options?: ReviewOptions;
+    } = {},
   ): Promise<GitReview> {
     if (options?.detailLevel === 'thorough') {
       this.model = ModelEnum.LARGE;
@@ -51,7 +57,11 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
 
     this.systemPrompt = this.getSystemPrompt(options);
 
-    const prompt = this.buildPrompt(mergeRequest, options);
+    const prompt = this.buildPrompt(
+      mergeRequest,
+      similarMergeRequests,
+      options,
+    );
     return this.execute(prompt, GitReviewSchema);
   }
 
@@ -68,8 +78,29 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
 
   private buildPrompt(
     mergeRequest: GitMergeRequest,
+    similarMergeRequests?: GitMergeRequest[],
     options?: ReviewOptions,
   ): string {
+    let examplesText = '';
+    if (similarMergeRequests && similarMergeRequests.length > 0) {
+      examplesText = '\n# Examples of previous high-quality reviews:\n';
+      similarMergeRequests.forEach((currentMergeRequest, index) => {
+        examplesText += `\nExample ${index + 1}:\n`;
+        examplesText += `Title: ${currentMergeRequest.title}\n`;
+        examplesText += `Review: ${JSON.stringify(currentMergeRequest.review, null, 2)}\n`;
+      });
+    }
+
+    let discussionsText = '';
+    if (mergeRequest.discussions && mergeRequest.discussions.length > 0) {
+      discussionsText = '\n# Related discussions:\n';
+      mergeRequest.discussions.forEach((discussion) => {
+        discussion.notes.slice(0, 3).forEach((note) => {
+          discussionsText += `Comment on ${note.newPath}:${note.position.newLine}: ${note.body}\n`;
+        });
+      });
+    }
+
     return `
       Analyze the following Git merge request and provide a ${options?.detailLevel || 'standard'} code review.
 
@@ -81,6 +112,9 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
         removeTests: false,
         ignorePatterns: options?.ignorePatterns,
       })}
+
+      ${discussionsText}
+      ${examplesText}
 
       ${this.getFocusInstructions(options)}
     `;

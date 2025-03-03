@@ -1,5 +1,6 @@
 import { GitReviewAgent } from '@/core/ai/agents/git-review/git-review.agent';
 import { GitService } from '@/core/git/git.service';
+import { GitMergeRequest } from '@/core/git/git.type';
 
 export type ReviewOptions = {
   detailLevel?: 'basic' | 'standard' | 'thorough';
@@ -18,7 +19,7 @@ export class ReviewMergeRequest {
     projectId: string,
     mergeRequestId: string,
     options?: ReviewOptions,
-  ) {
+  ): Promise<GitMergeRequest> {
     if (options?.verbose) {
       console.log(
         `Fetching merge request ${mergeRequestId} from project ${projectId}`,
@@ -38,8 +39,13 @@ export class ReviewMergeRequest {
       );
     }
 
-    const review = await this.gitReviewAgent.review(mergeRequest, options);
+    const review = await this.gitReviewAgent.review(mergeRequest, {
+      options,
+      similarMergeRequests: [],
+    });
 
-    return review;
+    mergeRequest.review = review;
+
+    return mergeRequest;
   }
 }

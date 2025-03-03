@@ -1,3 +1,5 @@
+import { GitReview } from '../ai/agents/git-review/git-review.schema';
+
 export type LanguageCode = 'ts' | 'js' | 'go' | 'py';
 
 export type GitDiff = {
@@ -20,7 +22,7 @@ export type GitNote = {
   body: string;
   position: {
     newLine: number;
-    oldLine?: number;
+    oldLine?: number | null;
   };
   createdAt: Date;
 };
@@ -32,4 +34,5 @@ export type GitMergeRequest = {
   discussions: GitDiscussions[];
   jiraId?: string;
   languageCode: LanguageCode;
+  review?: GitReview;
 };
