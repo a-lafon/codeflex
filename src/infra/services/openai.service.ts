@@ -1,6 +1,5 @@
 import OpenAI from 'openai';
 import { ILlmProvider, ModelEnum } from '../../core/ai/ai.interface';
-// import { encodingForModel, TiktokenModel } from 'js-tiktoken';
 const models = new Map<ModelEnum, string>([
   [ModelEnum.SMALL, 'gpt-4o-mini'],
   [ModelEnum.MEDIUM, 'gpt-4o'],
@@ -53,10 +52,4 @@ export class OpenAiService implements ILlmProvider {
 
     return content;
   }
-
-  // private countTokens(text: string, model: TiktokenModel): number {
-  //   const encoder = encodingForModel(model);
-  //   const tokens = encoder.encode(text);
-  //   return tokens.length;
-  // }
 }

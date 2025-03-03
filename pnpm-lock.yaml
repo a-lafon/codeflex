@@ -38,9 +38,6 @@ importers:
       commander:
         specifier: ^13.1.0
         version: 13.1.0
-      js-tiktoken:
-        specifier: ^1.0.19
-        version: 1.0.19
       openai:
         specifier: ^4.85.1
         version: 4.85.1(zod@3.24.2)
@@ -2438,9 +2435,6 @@ packages:
     peerDependenciesMeta:
       node-notifier:
         optional: true
-
-  js-tiktoken@1.0.19:
-    resolution: {integrity: sha512-XC63YQeEcS47Y53gg950xiZ4IWmkfMe4p2V9OSaBt26q+p47WHn18izuXzSclCI73B7yGqtfRsT6jcZQI0y08g==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -6319,10 +6313,6 @@ snapshots:
       - babel-plugin-macros
       - supports-color
       - ts-node
-
-  js-tiktoken@1.0.19:
-    dependencies:
-      base64-js: 1.5.1
 
   js-tokens@4.0.0: {}
 
