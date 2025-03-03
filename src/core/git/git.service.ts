@@ -8,10 +8,10 @@ export class GitService {
     @Inject(IGitProvider) private readonly gitProvider: IGitProvider,
   ) {}
 
-  async getMergeRequest(
+  async fetchMergeRequest(
     projectId: string,
     mergeRequestId: string,
   ): Promise<GitMergeRequest> {
-    return this.gitProvider.getMergeRequest(projectId, mergeRequestId);
+    return this.gitProvider.fetchMergeRequest(projectId, mergeRequestId);
   }
 }

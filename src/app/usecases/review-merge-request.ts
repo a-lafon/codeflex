@@ -26,7 +26,7 @@ export class ReviewMergeRequest {
       );
     }
 
-    const mergeRequest = await this.gitService.getMergeRequest(
+    const mergeRequest = await this.gitService.fetchMergeRequest(
       projectId,
       mergeRequestId,
     );

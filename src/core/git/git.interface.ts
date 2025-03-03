@@ -1,7 +1,7 @@
 import { GitMergeRequest } from './git.type';
 
 export interface IGitProvider {
-  getMergeRequest(
+  fetchMergeRequest(
     projectId: string,
     mergeRequestId: string,
   ): Promise<GitMergeRequest>;

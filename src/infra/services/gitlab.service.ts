@@ -16,7 +16,7 @@ const client = new Gitlab({
 });
 
 export class GitlabService implements IGitProvider {
-  async getMergeRequest(
+  async fetchMergeRequest(
     projectId: string,
     mergeRequestId: string,
   ): Promise<GitMergeRequest> {
