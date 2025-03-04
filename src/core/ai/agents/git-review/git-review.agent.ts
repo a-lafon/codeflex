@@ -1,7 +1,12 @@
 import { ILlmProvider, ModelEnum } from '../../ai.interface';
 import { Agent } from '../agent-base';
 import { Inject, Injectable } from '@nestjs/common';
-import { GitDiff, GitMergeRequest, LanguageCode } from '@/core/git/git.type';
+import {
+  GitDiff,
+  GitDiscussions,
+  GitMergeRequest,
+  LanguageCode,
+} from '@/core/git/git.type';
 import { ReviewOptions } from '@/app/usecases/review-merge-request';
 import {
   GitReviewSchema,
@@ -81,25 +86,8 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
     similarMergeRequests?: GitMergeRequest[],
     options?: ReviewOptions,
   ): string {
-    let examplesText = '';
-    if (similarMergeRequests && similarMergeRequests.length > 0) {
-      examplesText = '\n# Examples of previous high-quality reviews:\n';
-      similarMergeRequests.forEach((currentMergeRequest, index) => {
-        examplesText += `\nExample ${index + 1}:\n`;
-        examplesText += `Title: ${currentMergeRequest.title}\n`;
-        examplesText += `Review: ${JSON.stringify(currentMergeRequest.review, null, 2)}\n`;
-      });
-    }
-
-    let discussionsText = '';
-    if (mergeRequest.discussions && mergeRequest.discussions.length > 0) {
-      discussionsText = '\n# Related discussions:\n';
-      mergeRequest.discussions.forEach((discussion) => {
-        discussion.notes.slice(0, 3).forEach((note) => {
-          discussionsText += `Comment on ${note.newPath}:${note.position.newLine}: ${note.body}\n`;
-        });
-      });
-    }
+    const discussionsText = this.getDiscussionsPrompt(mergeRequest.discussions);
+    const examplesText = this.getExemplePrompt(similarMergeRequests);
 
     return `
       Analyze the following Git merge request and provide a ${options?.detailLevel || 'standard'} code review.
@@ -118,6 +106,36 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
 
       ${this.getFocusInstructions(options)}
     `;
+  }
+
+  private getExemplePrompt(similarMergeRequests?: GitMergeRequest[]): string {
+    let examplesText = '';
+    if (similarMergeRequests && similarMergeRequests.length > 0) {
+      examplesText = '\n# Examples of previous high-quality reviews:\n';
+      similarMergeRequests.forEach((currentMergeRequest, index) => {
+        examplesText += `\nExample ${index + 1}:\n`;
+        examplesText += `Title: ${currentMergeRequest.title}\n`;
+        examplesText += `Review: ${JSON.stringify(currentMergeRequest.review, null, 2)}\n`;
+        examplesText += this.getDiscussionsPrompt(
+          currentMergeRequest.discussions,
+        );
+      });
+    }
+    return examplesText;
+  }
+
+  private getDiscussionsPrompt(discussions: GitDiscussions[]): string {
+    let discussionsText = '';
+    if (discussions && discussions.length > 0) {
+      discussionsText = '\n# Related discussions:\n';
+      discussions.forEach((discussion) => {
+        // discussion.notes.slice(0, 3).forEach((note) => {
+        discussion.notes.forEach((note) => {
+          discussionsText += `Comment on ${note.newPath}:${note.position.newLine}: ${note.body}\n`;
+        });
+      });
+    }
+    return discussionsText;
   }
 
   private getFocusInstructions(options?: ReviewOptions): string {
