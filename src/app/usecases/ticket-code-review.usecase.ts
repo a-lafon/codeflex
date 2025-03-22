@@ -1,19 +1,19 @@
-import { IntegratedReviewAgent } from '@/core/ai/agents/integrated-review/integrated-review.agent';
 import { TicketService } from '@/core/ticket/ticket.service';
 import { GitMergeRequest } from '@/core/git/git.type';
 import { ReviewOptions } from './code-review-usecase';
-import { IntegratedReview } from '@/core/ai/agents/integrated-review/integrated-review.schema';
+import { TicketCodeValidator } from '@/core/ai/agents/ticket-code-validator/ticket-code-validator.schema';
+import { TicketCodeValidatorAgent } from '@/core/ai/agents/ticket-code-validator/ticket-code-validator.agent';
 
 export class TicketCodeReviewUseCase {
   constructor(
-    private readonly integratedReviewAgent: IntegratedReviewAgent,
+    private readonly ticketCodeValidatorAgent: TicketCodeValidatorAgent,
     private readonly ticketService: TicketService,
   ) {}
 
   async exec(
     mergeRequest: GitMergeRequest,
     options?: ReviewOptions & { overrideJiraId?: string },
-  ): Promise<IntegratedReview> {
+  ): Promise<TicketCodeValidator> {
     const jiraId = options?.overrideJiraId || mergeRequest.jiraId;
 
     if (!jiraId) {
@@ -23,10 +23,6 @@ export class TicketCodeReviewUseCase {
     }
 
     const ticket = await this.ticketService.getTicket(jiraId);
-    return this.integratedReviewAgent.integratedReview(
-      ticket,
-      mergeRequest,
-      options,
-    );
+    return this.ticketCodeValidatorAgent.review(ticket, mergeRequest, options);
   }
 }

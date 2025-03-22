@@ -3,7 +3,6 @@ import { TicketAnalyzerAgent } from './agents/ticket-analyzer/ticket-analyzer.ag
 import { OpenAiService } from '../../infra/services/openai.service';
 import { GitReviewAgent } from './agents/git-review/git-review.agent';
 import { ILlmProvider } from './ai.interface';
-import { IntegratedReviewAgent } from './agents/integrated-review/integrated-review.agent';
 
 const LlmProvider = { provide: ILlmProvider, useClass: OpenAiService };
 
@@ -12,13 +11,13 @@ const LlmProvider = { provide: ILlmProvider, useClass: OpenAiService };
     LlmProvider,
     TicketAnalyzerAgent,
     GitReviewAgent,
-    IntegratedReviewAgent,
+    TicketAnalyzerAgent,
   ],
   exports: [
     LlmProvider,
     TicketAnalyzerAgent,
     GitReviewAgent,
-    IntegratedReviewAgent,
+    TicketAnalyzerAgent,
   ],
 })
 export class AiModule {}

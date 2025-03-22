@@ -7,17 +7,17 @@ import { GitReviewAgent } from '../git-review/git-review.agent';
 import { TicketAnalyzerAgent } from '../ticket-analyzer/ticket-analyzer.agent';
 import { ReviewOptions } from '@/app/usecases/code-review-usecase';
 import {
-  IntegratedReviewSchema,
-  IntegratedReviewJsonSchema,
-  IntegratedReview,
-} from './integrated-review.schema';
+  TicketCodeValidatorSchema,
+  TicketCodeValidatorJsonSchema,
+  TicketCodeValidator,
+} from './ticket-code-validator.schema';
 
 @Injectable()
-export class IntegratedReviewAgent extends Agent<
-  typeof IntegratedReviewSchema
+export class TicketCodeValidatorAgent extends Agent<
+  typeof TicketCodeValidatorSchema
 > {
-  protected schemaName = 'integrated_review';
-  protected schemaObject = IntegratedReviewJsonSchema;
+  protected schemaName = 'ticket_code_validator';
+  protected schemaObject = TicketCodeValidatorJsonSchema;
   protected systemPrompt: string;
   protected model: ModelEnum = ModelEnum.LARGE;
 
@@ -38,24 +38,25 @@ export class IntegratedReviewAgent extends Agent<
     4. Overall assessment of the merge request's quality relative to the ticket's needs`;
   }
 
-  async integratedReview(
+  async review(
     ticket: Ticket,
     mergeRequest: GitMergeRequest,
     options?: ReviewOptions,
-  ): Promise<IntegratedReview> {
-    const ticketAnalysis = await this.ticketAnalyzerAgent.analyze(ticket);
-
-    const codeReview = await this.gitReviewAgent.review(mergeRequest, {
-      options,
-    });
+  ): Promise<TicketCodeValidator> {
+    const [ticketAnalysis, codeReview] = await Promise.all([
+      this.ticketAnalyzerAgent.analyze(ticket),
+      this.gitReviewAgent.review(mergeRequest, {
+        options,
+      }),
+    ]);
 
     const prompt = this.buildPrompt(ticketAnalysis, codeReview, mergeRequest);
-    return this.execute(prompt, IntegratedReviewSchema);
+    return this.execute(prompt, TicketCodeValidatorSchema);
   }
 
   private buildPrompt(
-    ticketAnalysis: IntegratedReview['ticketAnalysis'],
-    codeReview: IntegratedReview['codeReview'],
+    ticketAnalysis: TicketCodeValidator['ticketAnalysis'],
+    codeReview: TicketCodeValidator['codeReview'],
     mergeRequest: GitMergeRequest,
   ): string {
     return `
