@@ -23,7 +23,6 @@ export abstract class Agent<T extends ZodType<any, any, any>> {
       const data: unknown = JSON.parse(response);
       return schema.parse(data);
     } catch (error: unknown) {
-      console.log('type of error', typeof error);
       if (error instanceof Error) {
         console.error('error', error.message);
       }

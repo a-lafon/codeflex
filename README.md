@@ -13,6 +13,11 @@ CodeFlex helps developers automate code review tasks and ensure implementations 
 - **Validate implementation against ticket requirements** to ensure proper feature delivery
 - **Provide constructive feedback** with specific improvement suggestions
 
+### Documentation
+- **Generate comprehensive documentation** from merge request content
+- **Produce well-structured Markdown** with code examples and technical details
+- **Focus on specific documentation areas** based on your needs
+
 ## 💻 Installation
 
 ```bash
@@ -32,7 +37,13 @@ codeflex ticket-review -m MR-789 -p PROJECT-ID
 # Override Jira ticket ID
 codeflex ticket-review -m MR-789 -p PROJECT-ID -j JIRA-123
 
-# Additional options
+# Generate documentation from a merge request
+codeflex generate-docs -m MR-789 -p PROJECT-ID -o docs/feature.md
+
+# Additional documentation options
+codeflex generate-docs -m MR-789 -p PROJECT-ID --include-apis --include-code-examples --json
+
+# Additional review options
 --detail-level <basic|standard|thorough>  # Set review detail level
 --focus <areas>                           # Focus on specific areas (comma-separated)
 --ignore <patterns>                       # Ignore files matching patterns
@@ -55,7 +66,6 @@ codeflex ticket-review -m MR-789 -p PROJECT-ID -j JIRA-123
 3. **Effort Estimation** for implementing tickets
 4. **Regression Detection** by comparing PRs with bug history
 5. **Security Analysis** to detect potential vulnerabilities
-6. **Documentation Generation** from merge request content
 
 ## 🛠️ Technical Architecture
 
