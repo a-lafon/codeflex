@@ -59,6 +59,7 @@ codeflex generate-docs -m MR-789 -p PROJECT-ID --include-apis --include-code-exa
 2. **CI/CD Integration** - Silent mode and exit codes for pipeline integration
 3. **Custom Rule Configuration** - Configuration via `.codeflex.json` file
 4. **Multilingual Output** - Generate reviews in different languages
+5. **Review Consistency Engine** - Ensure uniform reviews by learning from past analyses
 
 ### Future Features
 1. **Automated Ticket Creation** from natural language descriptions
@@ -66,6 +67,23 @@ codeflex generate-docs -m MR-789 -p PROJECT-ID --include-apis --include-code-exa
 3. **Effort Estimation** for implementing tickets
 4. **Regression Detection** by comparing PRs with bug history
 5. **Security Analysis** to detect potential vulnerabilities
+6. **Organizational Learning** - Build a knowledge base of code patterns and solutions
+
+## 💡 Planned Review Consistency Engine
+
+A key planned feature for CodeFlex is a built-in consistency engine that will automatically deliver uniform, reliable code reviews:
+
+### How It Will Work
+1. Every time a code review is saved, it will become part of the knowledge base
+2. For new reviews, the system will identify relevant past reviews
+3. These past reviews will guide the AI to maintain consistent terminology, structure and quality standards
+4. Each new review will build organizational knowledge, making future reviews even better
+
+### Expected Benefits
+- **Predictable Feedback**: Developers will receive consistent guidance across reviews
+- **Self-Improving System**: Review quality will improve over time with more usage
+- **Organizational Memory**: Will capture and preserve review standards and conventions
+- **Cost-Effective**: Will reuse existing data without requiring additional AI processing
 
 ## 🛠️ Technical Architecture
 
