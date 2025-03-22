@@ -1,7 +1,7 @@
 import {
-  ReviewMergeRequest,
+  CodeReviewUseCase,
   ReviewOptions,
-} from '@/app/usecases/review-merge-request';
+} from '@/app/usecases/code-review-usecase';
 import { NestFactory } from '@nestjs/core';
 import { Command } from 'commander';
 import { CliModule } from './cli.module';
@@ -48,10 +48,27 @@ async function bootstrap() {
         verbose?: boolean;
         projectGuidelines?: string;
       }) => {
-        const reviewMergeRequest = new ReviewMergeRequest(
-          app.get(GitService),
+        const reviewMergeRequest = new CodeReviewUseCase(
           app.get(GitReviewAgent),
         );
+
+        if (options?.verbose) {
+          console.log(
+            `Fetching merge request ${options.mergeRequest} from project ${options.project}`,
+          );
+        }
+
+        const mergeRequest = await app
+          .get(GitService)
+          .fetchMergeRequest(options.project, options.mergeRequest);
+
+        if (options?.verbose) {
+          console.log(`Retrieved merge request: "${mergeRequest.title}"`);
+          console.log(
+            `Starting code review with options:`,
+            JSON.stringify(options, null, 2),
+          );
+        }
 
         const projectGuidelines = options.projectGuidelines
           ? await fs.promises.readFile(options.projectGuidelines, 'utf-8')
@@ -68,8 +85,7 @@ async function bootstrap() {
         };
 
         const review = await reviewMergeRequest.exec(
-          options.project,
-          options.mergeRequest,
+          mergeRequest,
           reviewOptions,
         );
 

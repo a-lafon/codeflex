@@ -1,46 +1,47 @@
-// import { Ticket, TicketWithReview } from '@/core/ticket/ticket.type';
-// import { ILlmProvider, ModelEnum } from '../../ai.interface';
-// import { Agent } from '../agent-base';
-// import { TicketAnalizerDto } from './ticket-analyzer.dto';
-// import { Inject, Injectable } from '@nestjs/common';
-export class TicketAnalyzerAgent {}
-// @Injectable()
-// export class TicketAnalyzerAgent extends Agent<TicketAnalizerDto> {
-//   protected model = ModelEnum.SMALL;
-//   protected systemPrompt = `You are a highly capable Jira Extractor. 
-//   Your task is to analyze the given Jira ticket and extract the key technical and functional requirements clearly. 
-//   Additionally, provide a summary of the ticket that focuses on the most important aspects and key points. 
-//   This summary should help the user quickly understand the core content of the ticket without reiterating the title or description.
-//   `;
-//   protected dto = TicketAnalizerDto;
+import { Ticket } from '@/core/ticket/ticket.type';
+import { ILlmProvider, ModelEnum } from '../../ai.interface';
+import { Agent } from '../agent-base';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  TicketAnalyzerSchema,
+  TicketAnalyzerJsonSchema,
+  TicketAnalyzer,
+} from './ticket-analyzer.schema';
 
-//   constructor(
-//     @Inject(ILlmProvider) protected readonly llmProvider: ILlmProvider,
-//   ) {
-//     super(llmProvider);
-//   }
+@Injectable()
+export class TicketAnalyzerAgent extends Agent<typeof TicketAnalyzerSchema> {
+  protected schemaName = 'ticket_analyzer';
+  protected schemaObject = TicketAnalyzerJsonSchema;
+  protected systemPrompt: string;
+  protected model: ModelEnum = ModelEnum.MEDIUM;
 
-//   // async extract(ticket: Ticket): Promise<TicketWithReview> {
-//   //   // const prompt = this.buildPrompt(ticket);
-//   //   // const response = await super.execute(prompt);
-//   //   // return {
-//   //   //   ...ticket,
-//   //   //   ...response,
-//   //   // };
-//   // }
+  constructor(
+    @Inject(ILlmProvider) protected readonly llmProvider: ILlmProvider,
+  ) {
+    super(llmProvider);
+    this.systemPrompt = `You are an expert Jira ticket analyzer.
+    Your task is to analyze a ticket and extract the main requirements and a clear summary.
+    For each ticket, identify:
+    1. A list of requirements or requested features
+    2. A concise but comprehensive summary of the ticket
+    
+    Be precise and technically oriented in your analysis.`;
+  }
 
-//   private buildPrompt(ticket: Ticket): string {
-//     return `
-//       Analyze the following Jira ticket and provide a summary of its content, including the key points mentioned in the description.
+  async analyze(ticket: Ticket): Promise<TicketAnalyzer> {
+    const prompt = this.buildPrompt(ticket);
+    return this.execute(prompt, TicketAnalyzerSchema);
+  }
 
-//       # Title:
-//       ${ticket.title}
+  private buildPrompt(ticket: Ticket): string {
+    return `
+      Analyze the following Jira ticket and extract the main requirements and a summary.
 
-//       # Description:
-//       ${ticket.description ? ticket.description : 'No description provided.'}
+      # Ticket title:
+      ${ticket.title}
 
-//       After summarizing the ticket, extract the technical and functional requirements.
-//       If any requirement is unclear, return 'unspecified' for that requirement.
-//     `;
-//   }
-// }
+      # Description:
+      ${ticket.description || 'No description provided'}
+    `;
+  }
+}

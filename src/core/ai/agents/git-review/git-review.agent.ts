@@ -7,7 +7,7 @@ import {
   GitMergeRequest,
   LanguageCode,
 } from '@/core/git/git.type';
-import { ReviewOptions } from '@/app/usecases/review-merge-request';
+import { ReviewOptions } from '@/app/usecases/code-review-usecase';
 import {
   GitReviewSchema,
   GitReviewJsonSchema,
@@ -19,7 +19,7 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
   protected schemaName = 'git_review';
   protected schemaObject = GitReviewJsonSchema;
   protected systemPrompt: string;
-  protected model: ModelEnum;
+  protected model: ModelEnum = ModelEnum.MEDIUM;
   protected baseSystemPrompt = `You are a highly capable Code Reviewer.
   Your task is to analyze the given Git merge request and provide a detailed review of the code changes.
   Focus on the following aspects:
