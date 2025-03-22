@@ -7,6 +7,8 @@ const CodeIssueSchema = z.object({
   line: z.number().optional(),
   severity: z.enum(['critical', 'major', 'minor', 'info']).optional(),
   category: z.string().optional(),
+  impact: z.string().optional(),
+  fixComplexity: z.enum(['simple', 'moderate', 'complex']).optional(),
 });
 
 const CodeSuggestionSchema = z.object({
@@ -14,6 +16,8 @@ const CodeSuggestionSchema = z.object({
   file: z.string().optional(),
   line: z.number().optional(),
   codeExample: z.string().optional(),
+  rationale: z.string().optional(),
+  alternatives: z.array(z.string()).optional(),
 });
 
 export const GitReviewSchema = z.object({
@@ -25,6 +29,17 @@ export const GitReviewSchema = z.object({
   overallAssessment: z.string().optional(),
   focusAreaAnalysis: z.array(z.string()).optional(),
   reviewDetailLevel: z.enum(['basic', 'standard', 'thorough']).optional(),
+  title: z.string(),
+  codeMetrics: z
+    .object({
+      complexity: z.number().optional(),
+      techDebt: z.string().optional(),
+      testability: z.number().min(1).max(10).optional(),
+    })
+    .optional(),
+  securityAssessment: z.string().optional(),
+  performanceImpact: z.string().optional(),
+  learningResources: z.array(z.string()).optional(),
 });
 
 export type GitReview = z.infer<typeof GitReviewSchema>;

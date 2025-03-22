@@ -20,20 +20,24 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
   protected schemaObject = GitReviewJsonSchema;
   protected systemPrompt: string;
   protected model: ModelEnum;
-  protected baseSystemPrompt = `You are a highly capable Code Reviewer. 
+  protected baseSystemPrompt = `You are a highly capable Code Reviewer.
   Your task is to analyze the given Git merge request and provide a detailed review of the code changes.
   Focus on the following aspects:
   1. Code quality (readability, maintainability, and adherence to best practices).
   2. Potential bugs or security issues.
   3. Consistency with the project's coding standards.
   4. Suggestions for improvement, if applicable.
+  5. Impact on performance and scalability.
+  6. Technical debt introduced or eliminated.
+  7. Adherence to SOLID principles and design patterns.
 
   Provide a detailed review that includes:
   - A summary of the changes.
   - A list of issues found in the code.
-  - Suggestions for improvement.
+  - Suggestions for improvement with concrete examples.
   - A detailed analysis of the changes, highlighting key modifications and their impact.
   - An optional rating of the code quality (out of 10).
+  - Relevant learning resources for the developer.
   `;
 
   constructor(
@@ -72,12 +76,17 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
 
   private getSystemPrompt(options?: ReviewOptions): string {
     let systemPrompt = this.baseSystemPrompt;
+
+    if (options?.projectGuidelines && options.projectGuidelines.length > 0) {
+      systemPrompt += `\n\nTake into account the following project-specific code guidelines: ${options.projectGuidelines}`;
+    }
     if (options?.detailLevel) {
       systemPrompt += `\n\nProvide a ${options.detailLevel} level of detail in your review.`;
     }
     if (options?.focusAreas && options.focusAreas.length > 0) {
       systemPrompt += `\n\nPay special attention to the following areas: ${options.focusAreas.join(', ')}.`;
     }
+
     return systemPrompt;
   }
 

@@ -35,6 +35,7 @@ async function bootstrap() {
     )
     .option('--file', 'Save review results to file')
     .option('--verbose', 'Show detailed process information')
+    .option('--project-guidelines <path>', 'Path to project guidelines file')
     .action(
       async (options: {
         mergeRequest: string;
@@ -45,11 +46,16 @@ async function bootstrap() {
         focus?: string;
         ignore?: string;
         verbose?: boolean;
+        projectGuidelines?: string;
       }) => {
         const reviewMergeRequest = new ReviewMergeRequest(
           app.get(GitService),
           app.get(GitReviewAgent),
         );
+
+        const projectGuidelines = options.projectGuidelines
+          ? await fs.promises.readFile(options.projectGuidelines, 'utf-8')
+          : undefined;
 
         const reviewOptions: ReviewOptions = {
           detailLevel: options.detailLevel as 'basic' | 'standard' | 'thorough',
@@ -58,6 +64,7 @@ async function bootstrap() {
             ?.split(',')
             .map((pattern) => pattern.trim()),
           verbose: options.verbose,
+          projectGuidelines,
         };
 
         const review = await reviewMergeRequest.exec(

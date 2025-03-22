@@ -7,6 +7,7 @@ export type ReviewOptions = {
   focusAreas?: string[];
   ignorePatterns?: string[];
   verbose?: boolean;
+  projectGuidelines?: string;
 };
 
 export class ReviewMergeRequest {
