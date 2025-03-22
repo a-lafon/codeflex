@@ -1,36 +1,17 @@
 # CodeFlex
 
-CodeFlex is an AI-powered development assistant designed to streamline daily developer tasks and improve workflow efficiency.
+An AI-powered development assistant designed to streamline developer workflows and improve code quality.
 
 ## 🚀 Overview
 
-CodeFlex helps developers automate routine tasks related to ticket management, code reviews, and documentation generation. Acting as an intelligent companion, it reduces manual overhead and ensures consistent workflows.
+CodeFlex helps developers automate code review tasks and ensure implementations match requirements. It acts as an intelligent companion to reduce manual overhead and maintain consistent quality standards.
 
-## 🎯 Core Features
+## 🎯 Current Features
 
-### Ticket Management
-- **Create tickets** with complete information based on developer inputs
-- **Clone and enhance** existing tickets with additional specifications
-- **Request clarification** on incomplete tickets by generating structured queries
-
-### Code Analysis
-- **Review merge/pull requests** for code quality, style conventions, and potential issues
+### Code Review
+- **Analyze merge/pull requests** for code quality, style conventions, and potential issues
+- **Validate implementation against ticket requirements** to ensure proper feature delivery
 - **Provide constructive feedback** with specific improvement suggestions
-
-### Documentation
-- **Auto-generate documentation** from merge request content
-- **Support standard formats** (Markdown, etc.)
-- **Maintain consistency** across project documentation
-
-## 🛠️ Technical Architecture
-
-### Interface
-- Command Line Interface (CLI) for seamless integration into developer workflows
-- Simple command structure: `codeflex <command> [options]`
-
-### Integrations
-- **Issue Tracking Systems**: JIRA, GitHub Issues, GitLab Issues
-- **Version Control Systems**: GitHub, GitLab, Bitbucket
 
 ## 💻 Installation
 
@@ -42,39 +23,42 @@ npm install -g codeflex
 ## 📋 Usage Examples
 
 ```bash
-# Create a new ticket
-codeflex create-ticket --title "Add pagination to users table" --description "The users table needs pagination to handle large datasets"
+# Review code quality
+codeflex review -m MR-789 -p PROJECT-ID
 
-# Clone and enhance an existing ticket
-codeflex enhance-ticket TICKET-123 --add "Add unit tests for the pagination component"
+# Validate implementation against Jira ticket requirements
+codeflex ticket-review -m MR-789 -p PROJECT-ID
 
-# Request more information on a ticket
-codeflex request-info TICKET-456
+# Override Jira ticket ID
+codeflex ticket-review -m MR-789 -p PROJECT-ID -j JIRA-123
 
-# Review a merge request
-codeflex review-mr MR-789
-
-# Generate documentation from a merge request
-codeflex generate-docs MR-789 --format markdown --output ./docs/feature.md
+# Additional options
+--detail-level <basic|standard|thorough>  # Set review detail level
+--focus <areas>                           # Focus on specific areas (comma-separated)
+--ignore <patterns>                       # Ignore files matching patterns
+--file                                    # Save results to file
+--verbose                                 # Show detailed information
+--project-guidelines <path>               # Path to project guidelines file
 ```
 
-## 🚧 MVP Roadmap
+## 🚧 Future Enhancements
 
-### Phase 1 (Current MVP)
-- Basic ticket management functionality
-- Simple code review capabilities
-- Documentation generation from merge requests
-- CLI interface
-- Integration with one issue tracking system and one VCS
+### Short-term Improvements
+1. **Output Formatting** - Add `--format` parameter (json, markdown, html)
+2. **CI/CD Integration** - Silent mode and exit codes for pipeline integration
+3. **Custom Rule Configuration** - Configuration via `.codeflex.json` file
+4. **Multilingual Output** - Generate reviews in different languages
 
-### Phase 2
-- Enhanced code analysis with AI-powered suggestions
-- Support for multiple issue tracking systems
-- Template-based ticket creation
-- Customizable documentation formats
+### Future Features
+1. **Automated Ticket Creation** from natural language descriptions
+2. **Test Generation** based on ticket specifications
+3. **Effort Estimation** for implementing tickets
+4. **Regression Detection** by comparing PRs with bug history
+5. **Security Analysis** to detect potential vulnerabilities
+6. **Documentation Generation** from merge request content
 
-### Phase 3
-- Interactive ticket refinement
-- Automated test suggestion
-- Integration with CI/CD pipelines
-- Performance optimization recommendations
+## 🛠️ Technical Architecture
+
+- Command Line Interface (CLI) for seamless workflow integration
+- Simple command structure: `codeflex <command> [options]`
+- Integrates with GitHub, GitLab, and JIRA
