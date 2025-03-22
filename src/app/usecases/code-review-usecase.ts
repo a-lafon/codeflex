@@ -17,11 +17,9 @@ export class CodeReviewUseCase {
     mergeRequest: GitMergeRequest,
     options?: ReviewOptions,
   ): Promise<GitReview> {
-    const review = await this.gitReviewAgent.review(mergeRequest, {
+    return this.gitReviewAgent.review(mergeRequest, {
       options,
       similarMergeRequests: [],
     });
-
-    return review;
   }
 }

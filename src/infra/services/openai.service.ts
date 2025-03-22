@@ -42,6 +42,8 @@ export class OpenAiService implements ILlmProvider {
     });
     const content = completion.choices[0].message.content;
 
+    console.log('schemaName', opts.schemaName);
+    console.log('model', model);
     console.log('prompt_tokens', completion.usage?.prompt_tokens);
     console.log('completion_tokens', completion.usage?.completion_tokens);
     console.log('total_tokens', completion.usage?.total_tokens);
