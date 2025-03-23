@@ -47,7 +47,7 @@ export function registerReviewCommand(
         const gitService = appContext.get(GitService);
         const storageService = appContext.get(StorageService);
 
-        const reviewMergeRequest = new CodeReviewUseCase(reviewAgent);
+        const codeReviewUseCase = new CodeReviewUseCase(reviewAgent);
 
         if (options?.verbose) {
           console.log(
@@ -82,13 +82,13 @@ export function registerReviewCommand(
           projectGuidelines,
         };
 
-        const review = await reviewMergeRequest.exec(
+        const review = await codeReviewUseCase.exec(
           mergeRequest,
           reviewOptions,
         );
 
         if (options.verbose) {
-          console.log('Review completed successfully.');
+          console.log('Review completed successfully');
         }
 
         try {
@@ -99,7 +99,7 @@ export function registerReviewCommand(
 
           if (options.verbose) {
             console.log(
-              `Review has been successfully saved in the storage system at ${filePath}.`,
+              `Review has been successfully saved in the storage system at ${filePath}`,
             );
           }
         } catch (error: unknown) {
