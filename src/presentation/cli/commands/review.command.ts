@@ -68,6 +68,22 @@ export function registerReviewCommand(
           );
         }
 
+        try {
+          const filePath = await storageService.saveMergeRequest(mergeRequest);
+
+          if (options.verbose) {
+            console.log(
+              `Review has been successfully saved in the storage system at ${filePath}`,
+            );
+          }
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            console.error(`Error saving the review: ${error.message}`);
+          } else {
+            console.error('Error saving the review: Unknown error occurred');
+          }
+        }
+
         const projectGuidelines = options.projectGuidelines
           ? await fs.promises.readFile(options.projectGuidelines, 'utf-8')
           : undefined;

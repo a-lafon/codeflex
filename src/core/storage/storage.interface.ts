@@ -12,11 +12,25 @@ export interface IReviewStorageProvider {
     projectId: ReviewStorageOptions['projectId'],
     limit?: number,
   ): Promise<GitReview[]>;
-  findSimilarReviews(
-    currentReview: GitMergeRequest,
-    options: ReviewStorageOptions,
+  findOneReview(
+    projectId: ReviewStorageOptions['projectId'],
+    mergeRequestId: ReviewStorageOptions['mergeRequestId'],
+  ): Promise<GitReview | null>;
+}
+
+export interface IMergeRequestStorageProvider {
+  saveMergeRequest(mergeRequest: GitMergeRequest): Promise<string>;
+  findMergeRequests(
+    projectId: string,
     limit?: number,
-  ): Promise<GitReview[]>;
+  ): Promise<GitMergeRequest[]>;
+  findSimilarMergeRequests(
+    currentMergeRequest: GitMergeRequest,
+    limit?: number,
+  ): Promise<GitMergeRequest[]>;
 }
 
 export const IReviewStorageProvider = Symbol('IReviewStorageProvider');
+export const IMergeRequestStorageProvider = Symbol(
+  'IMergeRequestStorageProvider',
+);

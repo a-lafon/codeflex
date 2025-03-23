@@ -28,6 +28,7 @@ export type GitNote = {
 };
 
 export type GitMergeRequest = {
+  projectId: string;
   id: string;
   title: string;
   diffs: GitDiff[];

@@ -124,6 +124,7 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
       similarMergeRequests.forEach((currentMergeRequest, index) => {
         examplesText += `\nExample ${index + 1}:\n`;
         examplesText += `Title: ${currentMergeRequest.title}\n`;
+        examplesText += `Changes: ${currentMergeRequest.diffs.length} files modified\n`;
         examplesText += `Review: ${JSON.stringify(currentMergeRequest.review, null, 2)}\n`;
         examplesText += this.getDiscussionsPrompt(
           currentMergeRequest.discussions,

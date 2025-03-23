@@ -31,6 +31,7 @@ export class GitlabService implements IGitProvider {
     const jiraId = this.getJiraId(mergeRequest);
 
     return {
+      projectId,
       id: mergeRequestId,
       title: mergeRequest.title,
       discussions: userDiscussions.map((discussion) => ({

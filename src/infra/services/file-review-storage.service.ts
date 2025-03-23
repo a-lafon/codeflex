@@ -66,6 +66,30 @@ export class FileReviewStorageService implements IReviewStorageProvider {
     return filePath;
   }
 
+  async findOneReview(
+    projectId: ReviewStorageOptions['projectId'],
+    mergeRequestId: ReviewStorageOptions['mergeRequestId'],
+  ): Promise<GitReview | null> {
+    const filePath = this.getReviewFilePath(projectId, mergeRequestId);
+
+    try {
+      if (!fs.existsSync(filePath)) {
+        return null;
+      }
+
+      const content = await fs.promises.readFile(filePath, 'utf8');
+      const review = JSON.parse(content) as GitReview;
+
+      return review;
+    } catch (error) {
+      console.error(
+        `Error retrieving review for merge request ${mergeRequestId}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      return null;
+    }
+  }
+
   async findReviews(
     projectId: ReviewStorageOptions['projectId'],
     limit = 10,
@@ -109,20 +133,5 @@ export class FileReviewStorageService implements IReviewStorageProvider {
       console.error('Error finding reviews:', error);
       return [];
     }
-  }
-
-  async findSimilarReviews(
-    currentReview: GitMergeRequest,
-    options: ReviewStorageOptions,
-    limit = 3,
-  ): Promise<GitReview[]> {
-    // Pour l'instant, cette méthode retourne simplement les revues les plus récentes
-    // Dans le futur, on pourrait implémenter un vrai algorithme de similarité
-
-    // Récupérer quelques revues de plus que demandé pour avoir une marge de manœuvre
-    const reviews = await this.findReviews(options.projectId, limit * 2);
-
-    // Pour l'instant, on retourne simplement les N revues les plus récentes
-    return reviews.slice(0, limit);
   }
 }
