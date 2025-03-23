@@ -23,11 +23,11 @@ export class FileReviewStorageService implements IReviewStorageProvider {
     return storageDir;
   }
 
-  private getProjectPath(options: ReviewStorageOptions): string {
+  private getProjectPath(projectId: ReviewStorageOptions['projectId']): string {
     const projectDir = path.join(
       this.getStorageBasePath(),
       'default',
-      options.projectId,
+      projectId,
     );
 
     if (!fs.existsSync(projectDir)) {
@@ -37,16 +37,22 @@ export class FileReviewStorageService implements IReviewStorageProvider {
     return projectDir;
   }
 
-  private getReviewFilePath(options: ReviewStorageOptions): string {
-    const projectDir = this.getProjectPath(options);
-    return path.join(projectDir, `mr_${options.mergeRequestId}.json`);
+  private getReviewFilePath(
+    projectId: ReviewStorageOptions['projectId'],
+    mergeRequestId: ReviewStorageOptions['mergeRequestId'],
+  ): string {
+    const projectDir = this.getProjectPath(projectId);
+    return path.join(projectDir, `mr_${mergeRequestId}.json`);
   }
 
   async saveReview(
     review: GitReview,
     options: ReviewStorageOptions,
   ): Promise<string> {
-    const filePath = this.getReviewFilePath(options);
+    const filePath = this.getReviewFilePath(
+      options.projectId,
+      options.mergeRequestId,
+    );
     const reviewData = {
       ...review,
       _meta: {
@@ -61,10 +67,10 @@ export class FileReviewStorageService implements IReviewStorageProvider {
   }
 
   async findReviews(
-    options: ReviewStorageOptions,
+    projectId: ReviewStorageOptions['projectId'],
     limit = 10,
   ): Promise<GitReview[]> {
-    const projectDir = this.getProjectPath(options);
+    const projectDir = this.getProjectPath(projectId);
 
     if (!fs.existsSync(projectDir)) {
       return [];
@@ -72,9 +78,7 @@ export class FileReviewStorageService implements IReviewStorageProvider {
 
     try {
       const files = await fs.promises.readdir(projectDir);
-      const reviewFiles = files
-        .filter((file) => file.endsWith('.json'))
-        .filter((file) => file !== `mr_${options.mergeRequestId}.json`);
+      const reviewFiles = files.filter((file) => file.endsWith('.json'));
 
       const reviewsWithStats = await Promise.all(
         reviewFiles.map(async (file) => {
@@ -116,7 +120,7 @@ export class FileReviewStorageService implements IReviewStorageProvider {
     // Dans le futur, on pourrait implémenter un vrai algorithme de similarité
 
     // Récupérer quelques revues de plus que demandé pour avoir une marge de manœuvre
-    const reviews = await this.findReviews(options, limit * 2);
+    const reviews = await this.findReviews(options.projectId, limit * 2);
 
     // Pour l'instant, on retourne simplement les N revues les plus récentes
     return reviews.slice(0, limit);

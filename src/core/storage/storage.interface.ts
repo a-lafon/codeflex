@@ -9,7 +9,7 @@ export type ReviewStorageOptions = {
 export interface IReviewStorageProvider {
   saveReview(review: GitReview, options: ReviewStorageOptions): Promise<string>;
   findReviews(
-    options: ReviewStorageOptions,
+    projectId: ReviewStorageOptions['projectId'],
     limit?: number,
   ): Promise<GitReview[]>;
   findSimilarReviews(
