@@ -7,6 +7,7 @@ import {
 import { GitService } from '@/core/git/git.service';
 import { GitReviewAgent } from '@/core/ai/agents/git-review/git-review.agent';
 import { INestApplicationContext } from '@nestjs/common';
+import { StorageService } from '@/core/storage/storage.service';
 
 export function registerReviewCommand(
   program: Command,
@@ -30,7 +31,6 @@ export function registerReviewCommand(
       '--ignore <patterns>',
       'Ignore files matching patterns (comma-separated glob patterns)',
     )
-    .option('--file', 'Save review results to file')
     .option('--verbose', 'Show detailed process information')
     .option('--project-guidelines <path>', 'Path to project guidelines file')
     .action(
@@ -38,16 +38,16 @@ export function registerReviewCommand(
         mergeRequest: string;
         project: string;
         detailLevel?: string;
-        format?: string;
-        file?: boolean;
         focus?: string;
         ignore?: string;
         verbose?: boolean;
         projectGuidelines?: string;
       }) => {
-        const reviewMergeRequest = new CodeReviewUseCase(
-          appContext.get(GitReviewAgent),
-        );
+        const reviewAgent = appContext.get(GitReviewAgent);
+        const gitService = appContext.get(GitService);
+        const storageService = appContext.get(StorageService);
+
+        const reviewMergeRequest = new CodeReviewUseCase(reviewAgent);
 
         if (options?.verbose) {
           console.log(
@@ -55,9 +55,10 @@ export function registerReviewCommand(
           );
         }
 
-        const mergeRequest = await appContext
-          .get(GitService)
-          .fetchMergeRequest(options.project, options.mergeRequest);
+        const mergeRequest = await gitService.fetchMergeRequest(
+          options.project,
+          options.mergeRequest,
+        );
 
         if (options?.verbose) {
           console.log(`Retrieved merge request: "${mergeRequest.title}"`);
@@ -90,14 +91,23 @@ export function registerReviewCommand(
           console.log('Review completed successfully.');
         }
 
-        if (options.file) {
-          const path = `review_${options.mergeRequest}.json`;
-          fs.writeFileSync(path, JSON.stringify(review, null, 2));
+        try {
+          const filePath = await storageService.saveReview(review, {
+            projectId: options.project,
+            mergeRequestId: options.mergeRequest,
+          });
+
           if (options.verbose) {
-            console.log(`Review stored successfully at ${path}.`);
+            console.log(
+              `Review has been successfully saved in the storage system at ${filePath}.`,
+            );
           }
-        } else {
-          console.log(JSON.stringify(review, null, 2));
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            console.error(`Error saving the review: ${error.message}`);
+          } else {
+            console.error('Error saving the review: Unknown error occurred');
+          }
         }
       },
     );

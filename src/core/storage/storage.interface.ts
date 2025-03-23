@@ -4,11 +4,10 @@ import { GitMergeRequest } from '@/core/git/git.type';
 export type ReviewStorageOptions = {
   projectId: string;
   mergeRequestId: string;
-  gitHost?: string;
 };
 
 export interface IReviewStorageProvider {
-  saveReview(review: GitReview, options: ReviewStorageOptions): Promise<void>;
+  saveReview(review: GitReview, options: ReviewStorageOptions): Promise<string>;
   findReviews(
     options: ReviewStorageOptions,
     limit?: number,

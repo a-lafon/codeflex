@@ -16,7 +16,7 @@ export class StorageService {
   async saveReview(
     review: GitReview,
     options: ReviewStorageOptions,
-  ): Promise<void> {
+  ): Promise<string> {
     return this.reviewStorageProvider.saveReview(review, options);
   }
 

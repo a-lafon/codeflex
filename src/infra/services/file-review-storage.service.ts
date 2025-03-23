@@ -24,10 +24,9 @@ export class FileReviewStorageService implements IReviewStorageProvider {
   }
 
   private getProjectPath(options: ReviewStorageOptions): string {
-    const gitHost = options.gitHost || 'default';
     const projectDir = path.join(
       this.getStorageBasePath(),
-      gitHost,
+      'default',
       options.projectId,
     );
 
@@ -46,7 +45,7 @@ export class FileReviewStorageService implements IReviewStorageProvider {
   async saveReview(
     review: GitReview,
     options: ReviewStorageOptions,
-  ): Promise<void> {
+  ): Promise<string> {
     const filePath = this.getReviewFilePath(options);
     const reviewData = {
       ...review,
@@ -58,6 +57,7 @@ export class FileReviewStorageService implements IReviewStorageProvider {
     };
 
     await fs.promises.writeFile(filePath, JSON.stringify(reviewData, null, 2));
+    return filePath;
   }
 
   async findReviews(

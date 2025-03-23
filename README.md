@@ -47,7 +47,6 @@ codeflex generate-docs -m MR-789 -p PROJECT-ID --include-apis --include-code-exa
 --detail-level <basic|standard|thorough>  # Set review detail level
 --focus <areas>                           # Focus on specific areas (comma-separated)
 --ignore <patterns>                       # Ignore files matching patterns
---file                                    # Save results to file
 --verbose                                 # Show detailed information
 --project-guidelines <path>               # Path to project guidelines file
 ```
@@ -55,8 +54,6 @@ codeflex generate-docs -m MR-789 -p PROJECT-ID --include-apis --include-code-exa
 ## 🚧 Future Enhancements
 
 ### Short-term Improvements
-1. **Output Formatting** - Add `--format` parameter (json, markdown, html)
-2. **CI/CD Integration** - Silent mode and exit codes for pipeline integration
 3. **Custom Rule Configuration** - Configuration via `.codeflex.json` file
 4. **Multilingual Output** - Generate reviews in different languages
 5. **Review Consistency Engine** - Ensure uniform reviews by learning from past analyses
