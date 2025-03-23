@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as os from 'os';
 import { Injectable } from '@nestjs/common';
 import { GitReview } from '@/core/ai/agents/git-review/git-review.schema';
-import { GitMergeRequest } from '@/core/git/git.type';
 import {
   IReviewStorageProvider,
   ReviewStorageOptions,

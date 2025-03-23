@@ -49,13 +49,27 @@ export class StorageService {
     return this.mergeRequestStorageProvider.findMergeRequests(projectId, limit);
   }
 
-  async findSimilarMergeRequests(
+  async findSimilarMergeRequestsWithReview(
     currentMergeRequest: GitMergeRequest,
     limit = 3,
   ): Promise<GitMergeRequest[]> {
-    return this.mergeRequestStorageProvider.findSimilarMergeRequests(
-      currentMergeRequest,
-      limit,
-    );
+    const mergeRequests =
+      await this.mergeRequestStorageProvider.findSimilarMergeRequests(
+        currentMergeRequest,
+        limit,
+      );
+
+    // TODO: batch find reviews
+    for (const mergeRequest of mergeRequests) {
+      const review = await this.findOneReview(
+        mergeRequest.projectId,
+        mergeRequest.id,
+      );
+      if (review) {
+        mergeRequest.review = review;
+      }
+    }
+
+    return mergeRequests;
   }
 }
