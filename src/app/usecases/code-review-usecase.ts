@@ -10,16 +10,18 @@ export type ReviewOptions = {
   projectGuidelines?: string;
 };
 
+export type CodeReviewUseCaseOptions = {
+  similarMergeRequests?: GitMergeRequest[];
+  options?: ReviewOptions;
+};
+
 export class CodeReviewUseCase {
   constructor(private readonly gitReviewAgent: GitReviewAgent) {}
 
   async exec(
     mergeRequest: GitMergeRequest,
-    options?: ReviewOptions,
+    options: CodeReviewUseCaseOptions,
   ): Promise<GitReview> {
-    return this.gitReviewAgent.review(mergeRequest, {
-      options,
-      similarMergeRequests: [],
-    });
+    return this.gitReviewAgent.review(mergeRequest, options);
   }
 }

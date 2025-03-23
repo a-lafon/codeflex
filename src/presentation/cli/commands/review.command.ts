@@ -98,10 +98,10 @@ export function registerReviewCommand(
           projectGuidelines,
         };
 
-        const review = await codeReviewUseCase.exec(
-          mergeRequest,
-          reviewOptions,
-        );
+        const review = await codeReviewUseCase.exec(mergeRequest, {
+          options: reviewOptions,
+          similarMergeRequests: [],
+        });
 
         if (options.verbose) {
           console.log('Review completed successfully');

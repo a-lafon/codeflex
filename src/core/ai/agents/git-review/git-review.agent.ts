@@ -7,7 +7,10 @@ import {
   GitMergeRequest,
   LanguageCode,
 } from '@/core/git/git.type';
-import { ReviewOptions } from '@/app/usecases/code-review-usecase';
+import {
+  CodeReviewUseCaseOptions,
+  ReviewOptions,
+} from '@/app/usecases/code-review-usecase';
 import {
   GitReviewSchema,
   GitReviewJsonSchema,
@@ -48,13 +51,7 @@ export class GitReviewAgent extends Agent<typeof GitReviewSchema> {
 
   async review(
     mergeRequest: GitMergeRequest,
-    {
-      options,
-      similarMergeRequests,
-    }: {
-      similarMergeRequests?: GitMergeRequest[];
-      options?: ReviewOptions;
-    } = {},
+    { options, similarMergeRequests }: CodeReviewUseCaseOptions,
   ): Promise<GitReview> {
     if (options?.detailLevel === 'thorough') {
       this.model = ModelEnum.LARGE;
