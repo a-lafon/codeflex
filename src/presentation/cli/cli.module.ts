@@ -1,9 +1,7 @@
-import { AiModule } from '@/core/ai/ai.module';
-import { GitModule } from '@/core/git/git.module';
-import { TicketModule } from '@/core/ticket/ticket.module';
+import { CoreModule } from '@/core/core.module';
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [GitModule, AiModule, TicketModule],
+  imports: [CoreModule],
 })
 export class CliModule {}
