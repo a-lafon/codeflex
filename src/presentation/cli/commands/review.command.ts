@@ -73,7 +73,7 @@ export function registerReviewCommand(
 
           if (options.verbose) {
             console.log(
-              `Review has been successfully saved in the storage system at ${filePath}`,
+              `Merge request has been successfully saved in the storage system at ${filePath}`,
             );
           }
         } catch (error: unknown) {

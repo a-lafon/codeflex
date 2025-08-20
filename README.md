@@ -2,11 +2,17 @@
 
 An AI-powered development assistant designed to streamline developer workflows and improve code quality.
 
-## 🚀 Overview
+## Development Note
+
+This project was developed as a learning exercise to explore AI integration within a NestJS context. While functional, it's a prototype that could benefit from improvements before production use.
+
+**Contributions and improvement suggestions are welcome!**
+
+## Overview
 
 CodeFlex helps developers automate code review tasks and ensure implementations match requirements. It acts as an intelligent companion to reduce manual overhead and maintain consistent quality standards.
 
-## 🎯 Current Features
+## Current Features
 
 ### Code Review
 - **Analyze merge/pull requests** for code quality, style conventions, and potential issues
@@ -18,14 +24,14 @@ CodeFlex helps developers automate code review tasks and ensure implementations 
 - **Produce well-structured Markdown** with code examples and technical details
 - **Focus on specific documentation areas** based on your needs
 
-## 💻 Installation
+## Installation
 
 ```bash
 # Coming soon
 npm install -g codeflex
 ```
 
-## 📋 Usage Examples
+## Usage Examples
 
 ```bash
 # Review code quality
@@ -51,7 +57,7 @@ codeflex generate-docs -m MR-789 -p PROJECT-ID --include-apis --include-code-exa
 --project-guidelines <path>               # Path to project guidelines file
 ```
 
-## 🚧 Future Enhancements
+## Future Enhancements
 
 ### Short-term Improvements
 3. **Custom Rule Configuration** - Configuration via `.codeflex.json` file
@@ -66,7 +72,7 @@ codeflex generate-docs -m MR-789 -p PROJECT-ID --include-apis --include-code-exa
 5. **Security Analysis** to detect potential vulnerabilities
 6. **Organizational Learning** - Build a knowledge base of code patterns and solutions
 
-## 💡 Planned Review Consistency Engine
+## Planned Review Consistency Engine
 
 A key planned feature for CodeFlex is a built-in consistency engine that will automatically deliver uniform, reliable code reviews:
 
@@ -82,7 +88,7 @@ A key planned feature for CodeFlex is a built-in consistency engine that will au
 - **Organizational Memory**: Will capture and preserve review standards and conventions
 - **Cost-Effective**: Will reuse existing data without requiring additional AI processing
 
-## 🛠️ Technical Architecture
+## Technical Architecture
 
 - Command Line Interface (CLI) for seamless workflow integration
 - Simple command structure: `codeflex <command> [options]`
